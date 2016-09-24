@@ -91,6 +91,7 @@ Function Invoke-WebHookInboxResponder {
 }
 
 Function Start-WebHookInboxResponderJob {
+    [CMDLetBinding()]
     param (
         $WebHookInboxID
     )
@@ -116,13 +117,15 @@ Function Get-ATTCompanyCellPhones {
 }
 
 Function Test-CorporatePhoneNumbers {
+    [CMDLetBinding()]
+    param ()
     $TwilioPhoneNumberForOutBoundCall = Get-TwilioIncomingPhoneNumbers | 
     select -ExpandProperty incoming_phone_numbers | 
     select -ExpandProperty phone_number
 
-    #$WebHookInboxResponse = New-WebHookInbox -Response_Mode wait
-    #Set-WebHookInboxID -WebHookInboxID $WebHookInboxResponse.id
-    #Start-WebHookInboxResponderJob -WebHookInboxID $WebHookInboxResponse.id
+    $WebHookInboxResponse = New-WebHookInbox -Response_Mode wait
+    Set-WebHookInboxID -WebHookInboxID $WebHookInboxResponse.id
+    Start-WebHookInboxResponderJob -WebHookInboxID $WebHookInboxResponse.id
     
     $CompanyCellPhones = Get-ATTCompanyCellPhones | Where 'Wireless User Full Name' -Match "Chris Magnuson"
 
@@ -134,7 +137,7 @@ Function Test-CorporatePhoneNumbers {
 Function New-URLToConfirmPhoneStillInUseByPressing1AndSayingName {
     New-TwilioTwimletSimpleMenuURL -Message "Hello, This is a message from Tervis IT. Please press 1 to confirm you still use this company supplied cell phone." -Options (
         New-TwilioTwimletSimpleMenuOption -Digits 1 -Url (
-            New-TervisTwimletMessageAndRecordURL -Message "Please say your name and then press any key" -Action (
+            New-TervisTwimletMessageAndRecordURL -Message "Please say your full name, first and last, and then press any key" -Action (
                 New-TestCoropratePhoneNumberWebHookInboxURL -CallHandlingApplicationStateName "CaptureRecordingAndRedirect"
             )
         )
